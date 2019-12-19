@@ -76,13 +76,13 @@ instance.prototype.actions = function(system) {
 			label: 'Brightness',
 			options: [
 				{
-					 type: 'textinput',
-					 label: 'Brightness',
-					 id: 'brightness_value',
-					 default: 100,
-					 /*min: 0,
-					 max: 100,*/
-					 regex: self.REGEX_SIGNED_NUMBER
+					type: 'textinput',
+					label: 'Brightness',
+					id: 'brightness_value',
+					default: 100,
+					/*min: 0,
+					max: 100,*/
+					regex: self.REGEX_SIGNED_NUMBER
 				}
 			]
 		},
@@ -90,22 +90,22 @@ instance.prototype.actions = function(system) {
 			label: 'Select clip',
 			options: [
 				{
-					 type: 'textinput',
-					 label: 'Page',
-					 id: 'page_value',
-					 default: 1,
-					 /*min: -1,
-					 max: 100,*/
-					 regex: self.REGEX_SIGNED_NUMBER
+					type: 'textinput',
+					label: 'Page',
+					id: 'page_value',
+					default: 1,
+					/*min: -1,
+					max: 100,*/
+					regex: self.REGEX_SIGNED_NUMBER
 				},
 				{
-					 type: 'textinput',
-					 label: 'Cell',
-					 id: 'cell_value',
-					 default: 1,
-					 /*min: -1,
-					 max: 100,*/
-					 regex: self.REGEX_SIGNED_NUMBER
+					type: 'textinput',
+					label: 'Cell',
+					id: 'cell_value',
+					default: 1,
+					/*min: -1,
+					max: 100,*/
+					regex: self.REGEX_SIGNED_NUMBER
 				}
 			]
 		},
@@ -116,19 +116,19 @@ instance.prototype.actions = function(system) {
 			label: 'BPM',
 			options: [
 				{
-					 type: 'textinput',
-					 label: 'BPM',
-					 id: 'bpm_value',
-					 default: 60,
-					 /*min: 0,
-					 max: 400,*/
-					 regex: self.REGEX_SIGNED_NUMBER
+					type: 'textinput',
+					label: 'BPM',
+					id: 'bpm_value',
+					default: 60,
+					/*min: 0,
+					max: 400,*/
+					regex: self.REGEX_SIGNED_NUMBER
 				}
 			]
 		},
 		'bpmtap': {
 			label: 'BPM Tap',
-		},	
+		},
 		'laserenable': {
 			label: 'Enable Output'
 		},
@@ -188,60 +188,63 @@ instance.prototype.init_presets = function () {
 instance.prototype.action = function(action) {
 	var self = this;
 	debug('action: ', action);
+
 	if (action.action == 'Brightness') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/master/brightness", quickint(action.options.brightness_value));
 	}
-	if (action.action == 'laserenable') {
+	else if (action.action == 'laserenable') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/enablelaseroutput", quickint(1));
 	}
-	if (action.action == 'laserdisable') {
+	else if (action.action == 'laserdisable') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/disablelaseroutput", quickint(1));
 	}
-	if (action.action == 'onecue') {
+	else if (action.action == 'onecue') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/onecue", quickint(1));
 	}
-	if (action.action == 'multicue') {
+	else if (action.action == 'multicue') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/multicue", quickint(1));
 	}
-	if (action.action == 'select') {
+	else if (action.action == 'select') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clickselect", quickint(1));
 	}
-	if (action.action == 'toggle') {
+	else if (action.action == 'toggle') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clicktoggle", quickint(1));
 	}
-	if (action.action == 'restart') {
+	else if (action.action == 'restart') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clickrestart", quickint(1));
 	}
-	if (action.action == 'flash') {
+	else if (action.action == 'flash') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clickflash", quickint(1));
 	}
-	if (action.action == 'soloflash') {
+	else if (action.action == 'soloflash') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clicksoloflash", quickint(1));
 	}
-	if (action.action == 'Blackout') {
+	else if (action.action == 'Blackout') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/blackout", quickint(1));
 	}
-	if (action.action == 'startclip') {
+	else if (action.action == 'startclip') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/StartCell", quickint(1));
 	}
-	if (action.action == 'bpmtap') {
+	else if (action.action == 'bpmtap') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/BeatTap", quickint(1));
 	}
-	if (action.action == 'bpm') {
+	else if (action.action == 'bpm') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/b/master/bpm", quickint(action.options.bpm_value));
 	}
-	if (action.action == 'selectclip') {
+	else if (action.action == 'selectclip') {
 		self.system.emit('osc_send', self.config.host, self.config.port, "/b/Grid/PageIndex", quickint(action.options.page_value));
 		self.system.emit('osc_send', self.config.host, self.config.port, "/b/Grid/CellIndex", quickint(action.options.cell_value));
 	}
 };
+
 function quickint(integer)
 {
 	var bol = {
-				type: "i",
-				value: parseInt(integer)
+			type: "i",
+			value: parseInt(integer)
 		};
 	return bol;
 }
+
 instance_skel.extendedBy(instance);
 exports = module.exports = instance;
