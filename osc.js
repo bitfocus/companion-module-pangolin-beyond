@@ -77,7 +77,7 @@ instance.prototype.destroy = function() {
 
 instance.prototype.actions = function(system) {
 	var self = this;
-	self.system.emit('instance_actions', self.id, {
+	self.setActions({
 		'Brightness': {
 			label: 'Brightness',
 			options: [
@@ -196,50 +196,50 @@ instance.prototype.action = function(action) {
 	debug('action: ', action);
 
 	if (action.action == 'Brightness') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/master/brightness", quickint(action.options.brightness_value));
+		self.oscSend(self.config.host, self.config.port, "/beyond/master/brightness", quickint(action.options.brightness_value));
 	}
 	else if (action.action == 'laserenable') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/enablelaseroutput", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/enablelaseroutput", quickint(1));
 	}
 	else if (action.action == 'laserdisable') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/disablelaseroutput", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/disablelaseroutput", quickint(1));
 	}
 	else if (action.action == 'onecue') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/onecue", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/onecue", quickint(1));
 	}
 	else if (action.action == 'multicue') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/multicue", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/multicue", quickint(1));
 	}
 	else if (action.action == 'select') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clickselect", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/clickselect", quickint(1));
 	}
 	else if (action.action == 'toggle') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clicktoggle", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/clicktoggle", quickint(1));
 	}
 	else if (action.action == 'restart') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clickrestart", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/clickrestart", quickint(1));
 	}
 	else if (action.action == 'flash') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clickflash", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/clickflash", quickint(1));
 	}
 	else if (action.action == 'soloflash') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/clicksoloflash", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/clicksoloflash", quickint(1));
 	}
 	else if (action.action == 'Blackout') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/blackout", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/blackout", quickint(1));
 	}
 	else if (action.action == 'startclip') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/StartCell", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/StartCell", quickint(1));
 	}
 	else if (action.action == 'bpmtap') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/beyond/general/BeatTap", quickint(1));
+		self.oscSend(self.config.host, self.config.port, "/beyond/general/BeatTap", quickint(1));
 	}
 	else if (action.action == 'bpm') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/b/master/bpm", quickint(action.options.bpm_value));
+		self.oscSend(self.config.host, self.config.port, "/b/master/bpm", quickint(action.options.bpm_value));
 	}
 	else if (action.action == 'selectclip') {
-		self.system.emit('osc_send', self.config.host, self.config.port, "/b/Grid/PageIndex", quickint(action.options.page_value));
-		self.system.emit('osc_send', self.config.host, self.config.port, "/b/Grid/CellIndex", quickint(action.options.cell_value));
+		self.oscSend(self.config.host, self.config.port, "/b/Grid/PageIndex", quickint(action.options.page_value));
+		self.oscSend(self.config.host, self.config.port, "/b/Grid/CellIndex", quickint(action.options.cell_value));
 	}
 };
 
