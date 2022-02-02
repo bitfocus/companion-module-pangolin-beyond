@@ -15,5 +15,13 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "Nijs Jonas",
-	"license": "MIT"
+	"license": "MIT",
+	"homepage": "https://github.com/bitfocus/companion-module-pangolin-beyond#readme",
+	"bugs": {
+		"url": "https://github.com/bitfocus/companion-module-pangolin-beyond/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-pangolin-beyond.git"
+	}
 }
