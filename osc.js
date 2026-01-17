@@ -92,6 +92,34 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'fx': {
+			label: 'FX',
+			options: [
+				{
+					type: 'textinput',
+					label: 'FX',
+					id: 'fx_value',
+					default: 0,
+					/*min: 0,
+					max: 100,*/
+					regex: self.REGEX_SIGNED_NUMBER
+				}
+			]
+		},
+		'hue': {
+			label: 'Hue',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Hue',
+					id: 'hue_value',
+					default: 0,
+					/*min: 0,
+					max: 360,*/
+					regex: self.REGEX_SIGNED_NUMBER
+				}
+			]
+		},
 		'selectclip': {
 			label: 'Select clip',
 			options: [
@@ -197,6 +225,12 @@ instance.prototype.action = function(action) {
 
 	if (action.action == 'Brightness') {
 		self.oscSend(self.config.host, self.config.port, "/beyond/master/brightness", quickint(action.options.brightness_value));
+	}
+	else if (action.action == 'fx') {
+		self.oscSend(self.config.host, self.config.port, "/beyond/master/fx", quickint(action.options.fx_value));
+	}
+	else if (action.action == 'hue') {
+		self.oscSend(self.config.host, self.config.port, "/beyond/master/hue", quickint(action.options.hue_value));
 	}
 	else if (action.action == 'laserenable') {
 		self.oscSend(self.config.host, self.config.port, "/beyond/general/enablelaseroutput", quickint(1));

@@ -7,6 +7,8 @@ Controls Pangolin Beyond.
 
 ### Available Actions
 * Set Brightness
+* Set FX
+* Set Hue
 * Select clip
 * Start clip
 * Set BPM
