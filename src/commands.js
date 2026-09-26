@@ -54,6 +54,15 @@ function dropdownOption(id, label, choices, defaultValue, options = {}) {
 	}
 }
 
+function valueCommand(id, name, path, value, type = 'i') {
+	return {
+		id,
+		name,
+		options: [],
+		buildMessages: () => [{ path, type, value }],
+	}
+}
+
 function triggerCommand(id, name, path) {
 	return {
 		id,
@@ -61,6 +70,98 @@ function triggerCommand(id, name, path) {
 		options: [],
 		buildMessages: () => [{ path, value: 1 }],
 	}
+}
+
+function clipCoordinateOptions() {
+	return [
+		integerOption('page_value', 'Page', 1, {
+			minValue: 0,
+			tooltip: 'Page index, starting at 0.',
+		}),
+		integerOption('column_value', 'Column', 1, {
+			minValue: 1,
+			tooltip: 'Column in the specified page, starting at 1 on the left.',
+		}),
+		integerOption('row_value', 'Row', 1, {
+			minValue: 1,
+			tooltip: 'Row in the specified page, starting at 1 at the top.',
+		}),
+	]
+}
+
+function clipCommand(id, verb, buildPlaybackMessages, focusSpecificClip = true) {
+	const options = [
+		{
+			type: 'checkbox',
+			id: 'use_specific_clip',
+			label: `${verb} a specific clip`,
+			default: false,
+		},
+		...clipCoordinateOptions().map((option) => ({
+			...option,
+			isVisibleExpression: '$(options:use_specific_clip) === true',
+		})),
+	]
+
+	return {
+		id,
+		name: `${verb} clip`,
+		options,
+		// Hidden coordinates must not prevent controlling the currently focused clip.
+		getActiveOptions: (values) => (values.use_specific_clip ? options : options.slice(0, 1)),
+		buildMessages: (values, config) => {
+			const playbackMessages = buildPlaybackMessages(values, config)
+			if (!values.use_specific_clip || !focusSpecificClip) return playbackMessages
+
+			return [
+				{ path: '/b/Grid/PageIndex', value: values.page_value },
+				{
+					// FocusCell takes column and row, not page and cell index.
+					path: '/beyond/general/FocusCell',
+					args: [
+						{ type: 'i', value: values.column_value },
+						{ type: 'i', value: values.row_value },
+					],
+				},
+				...playbackMessages,
+			]
+		},
+	}
+}
+
+function specificClipArguments(values, config = {}) {
+	const gridColumns = Number(config.grid_columns ?? 8)
+	if (!Number.isInteger(gridColumns) || gridColumns < 1 || gridColumns > 256) {
+		throw new Error('Grid columns must be an integer between 1 and 256 in the connection settings')
+	}
+	if (values.column_value > gridColumns) {
+		throw new Error(`Column must be at most ${gridColumns}, matching Grid columns in the connection settings`)
+	}
+
+	// Native OSC cue commands use zero-based page and flat cue indexes.
+	// https://forums.pangolin.com/threads/beyond-to-receive-osc.21866/
+	const cueIndex = (values.row_value - 1) * gridColumns + values.column_value - 1
+	if (!Number.isSafeInteger(cueIndex) || cueIndex > 2147483647) {
+		throw new Error('Row is too large to address a cue with OSC')
+	}
+	return [
+		{ type: 'i', value: values.page_value },
+		{ type: 'i', value: cueIndex },
+	]
+}
+
+function startClipMessages(values, config) {
+	if (!values.use_specific_clip) return [{ path: '/beyond/general/StartCell', value: 1 }]
+
+	const args = specificClipArguments(values, config)
+	return ['CueDown', 'CueUp'].map((command) => ({ path: `/beyond/general/${command}`, args }))
+}
+
+function stopClipMessages(values, config) {
+	if (!values.use_specific_clip) return [{ path: '/beyond/general/StopCell', args: [] }]
+
+	// Address the cue directly: stopping must not depend on a preceding page/focus change.
+	return [{ path: '/beyond/general/StopCueNow', args: specificClipArguments(values, config) }]
 }
 
 function parseCustomArguments(input) {
@@ -237,6 +338,22 @@ module.exports = [
 	{
 		id: 'selectclip',
 		name: 'Select clip',
+		options: clipCoordinateOptions(),
+		buildMessages: (options, config) => {
+			const [page, cue] = specificClipArguments(options, config)
+			// Grid.CellIndex uses 1 for the first cell; native cue commands use 0.
+			const cellIndex = cue.value + 1
+			if (cellIndex > 2147483647) throw new Error('Row is too large to select a cell with OSC')
+			return [
+				{ path: '/b/Grid/PageIndex', value: page.value },
+				{ path: '/b/Grid/CellIndex', value: cellIndex },
+			]
+		},
+	},
+	{
+		// Preserve dynamic flat Cell variables from older saved actions.
+		id: 'selectclip_legacy',
+		name: 'Select clip (legacy Cell index)',
 		options: [integerOption('page_value', 'Page', 1), integerOption('cell_value', 'Cell', 1)],
 		buildMessages: (options) => [
 			{
@@ -249,58 +366,8 @@ module.exports = [
 			},
 		],
 	},
-	{
-		id: 'startclip',
-		name: 'Start clip',
-		options: [
-			{
-				type: 'checkbox',
-				id: 'use_specific_clip',
-				label: 'Start a specific clip',
-				default: false,
-			},
-			{
-				...integerOption('page_value', 'Page', 1, {
-					minValue: 1,
-					tooltip: 'Page number to focus before starting the clip.',
-				}),
-				isVisible: (options) => options.use_specific_clip === true,
-				isVisibleExpression: '$(options:use_specific_clip) === true',
-			},
-			{
-				...integerOption('cell_value', 'Cell', 1, {
-					minValue: 1,
-					tooltip: 'Cell number to focus before starting the clip.',
-				}),
-				isVisible: (options) => options.use_specific_clip === true,
-				isVisibleExpression: '$(options:use_specific_clip) === true',
-			},
-		],
-		buildMessages: (options) => {
-			if (options.use_specific_clip) {
-				return [
-					{
-						path: '/beyond/general/FocusCell',
-						args: [
-							{ type: 'i', value: options.page_value },
-							{ type: 'i', value: options.cell_value },
-						],
-					},
-					{
-						path: '/beyond/general/StartCell',
-						value: 1,
-					},
-				]
-			}
-
-			return [
-				{
-					path: '/beyond/general/StartCell',
-					value: 1,
-				},
-			]
-		},
-	},
+	clipCommand('startclip', 'Start', startClipMessages),
+	clipCommand('stopclip', 'Stop', stopClipMessages, false),
 	{
 		id: 'bpm',
 		name: 'BPM',
@@ -339,6 +406,8 @@ module.exports = [
 	triggerCommand('bpmtap', 'BPM Tap', '/beyond/general/BeatTap'),
 	triggerCommand('laserenable', 'Enable Output', '/beyond/general/enablelaseroutput'),
 	triggerCommand('laserdisable', 'Disable Output', '/beyond/general/disablelaseroutput'),
+	valueCommand('dmxinenable', 'Enable DMX input', '/beyond/general/EnableDmxIn', 1, 'f'),
+	valueCommand('dmxindisable', 'Disable DMX input', '/beyond/general/EnableDmxIn', 0, 'f'),
 	triggerCommand('Blackout', 'Blackout', '/beyond/general/blackout'),
 	triggerCommand('onecue', 'One cue', '/beyond/general/onecue'),
 	triggerCommand('multicue', 'Multi cue', '/beyond/general/multicue'),
