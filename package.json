@@ -1,9 +1,10 @@
 {
 	"name": "pangolin-beyond",
-	"version": "1.1.0",
+	"version": "2.0.0",
 	"description": "Bitfocus Companion module for controlling Pangolin Beyond over OSC",
 	"main": "src/main.js",
 	"scripts": {
+		"test": "node --test",
 		"format": "prettier -w .",
 		"build": "companion-module-build --dev",
 		"package": "companion-module-build"

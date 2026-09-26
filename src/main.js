@@ -56,6 +56,18 @@ class ModuleInstance extends InstanceBase {
 				regex: Regex.PORT,
 				required: true,
 			},
+			{
+				type: 'number',
+				id: 'grid_columns',
+				label: 'Grid columns',
+				width: 4,
+				default: 8,
+				min: 1,
+				max: 256,
+				step: 1,
+				tooltip:
+					'Match the number of columns in the BEYOND cue grid. Used when selecting, starting or stopping a specific clip.',
+			},
 		]
 	}
 

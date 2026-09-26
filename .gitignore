@@ -4,4 +4,8 @@ package-lock.json
 /*.tgz
 DEBUG-*
 /.yarn
+<<<<<<< HEAD
 test/actions.test.js
+=======
+/test/
+>>>>>>> cbb95a137c2281a8e0438319424d9eb9a4f56739

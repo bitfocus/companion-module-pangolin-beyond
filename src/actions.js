@@ -1,22 +1,5 @@
 const COMMANDS = require('./commands')
 
-async function resolveOptions(self, optionDefinitions, inputOptions) {
-	const resolvedOptions = {}
-
-	for (const option of optionDefinitions) {
-		if (!option.id) continue
-
-		const rawValue = inputOptions?.[option.id]
-		if (option.useVariables) {
-			resolvedOptions[option.id] = await self.parseVariablesInString(String(rawValue ?? ''))
-		} else {
-			resolvedOptions[option.id] = rawValue
-		}
-	}
-
-	return resolvedOptions
-}
-
 function toInteger(value, label) {
 	const parsed = Number.parseInt(String(value).trim(), 10)
 	if (!Number.isInteger(parsed)) {
@@ -36,10 +19,10 @@ function toFloat(value, label) {
 }
 
 function normalizeOptions(command) {
-	return (resolvedOptions) => {
+	return (resolvedOptions = {}) => {
 		const normalizedOptions = {}
 
-		for (const option of command.options) {
+		for (const option of command.getActiveOptions?.(resolvedOptions) ?? command.options) {
 			if (!option.id) continue
 
 			if (option.valueType === 'integer') {
@@ -80,9 +63,8 @@ module.exports = function (self) {
 			options: command.options,
 			callback: async (event) => {
 				try {
-					const resolvedOptions = await resolveOptions(self, command.options, event.options)
-					const normalizedOptions = normalizeOptions(command)(resolvedOptions)
-					const messages = command.buildMessages(normalizedOptions)
+					const normalizedOptions = normalizeOptions(command)(event.options)
+					const messages = command.buildMessages(normalizedOptions, self.config)
 					self.sendCommandBatch(command.id, messages)
 				} catch (error) {
 					self.log('error', `Unable to send "${command.name}": ${error.message}`)
